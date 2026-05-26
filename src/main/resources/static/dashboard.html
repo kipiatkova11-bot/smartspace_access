@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет - SmartSpace Access</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo h2 {
+            color: #667eea;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn-logout {
+            background: #f56565;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Welcome Banner */
+        .welcome-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        .welcome-banner h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        /* Workspaces Grid */
+        .section-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .workspaces-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .workspace-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .workspace-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .workspace-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .workspace-desc {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .workspace-price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .workspace-price span {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .workspace-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        .status-free {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-busy {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .btn-book {
+            width: 100%;
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-book:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        /* My Bookings */
+        .bookings-section {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .booking-item {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .booking-info h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .booking-info p {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .booking-price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .btn-cancel {
+            background: #fed7d7;
+            color: #742a2a;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 450px;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            display: none;
+            z-index: 1100;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="logo">
+        <h2>🚀 SmartSpace Access</h2>
+    </div>
+    <div class="user-info">
+        <span id="userName"></span>
+        <button class="btn-logout" onclick="logout()">Выйти</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="welcome-banner">
+        <h1 id="welcomeMessage"></h1>
+        <p>Бронируйте рабочие места, управляйте временем и получайте счета онлайн</p>
+    </div>
+
+    <div class="section-title">🔥 Доступные рабочие места</div>
+    <div class="workspaces-grid" id="workspacesGrid"></div>
+
+    <div class="bookings-section">
+        <div class="section-title">📋 Мои активные бронирования</div>
+        <div id="bookingsList"></div>
+    </div>
+</div>
+
+<!-- Modal бронирования -->
+<div id="bookingModal" class="modal">
+    <div class="modal-content">
+        <h2>📅 Бронирование</h2>
+        <input type="hidden" id="bookWorkspaceId">
+        <p><strong>Место:</strong> <span id="bookWorkspaceName"></span></p>
+        <label>Начало:</label>
+        <input type="datetime-local" id="bookStart" required>
+        <label>Окончание:</label>
+        <input type="datetime-local" id="bookEnd" required>
+        <p id="bookPrice" style="color: #667eea; font-weight: bold; margin-top: 10px;"></p>
+        <div class="modal-buttons">
+            <button class="btn-book" onclick="confirmBooking()">Подтвердить</button>
+            <button class="btn-book" style="background: #cbd5e0;" onclick="closeModal()">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    let currentUser = null;
+    let workspaces = [];
+    let myBookings = [];
+
+    // Загрузка данных
+    async function loadUser() {
+        try {
+            const response = await fetch('/api/auth/me', { credentials: 'include' });
+            if (response.ok) {
+                currentUser = await response.json();
+                document.getElementById('userName').innerHTML = `👋 ${currentUser.fullName}`;
+                document.getElementById('welcomeMessage').innerHTML = `Привет, ${currentUser.fullName}!`;
+                return true;
+            }
+        } catch (error) {
+            console.error('Auth error:', error);
+        }
+        window.location.href = '/login.html';
+        return false;
+    }
+
+    async function loadWorkspaces() {
+        try {
+            const response = await fetch('/api/bookings/workspaces', { credentials: 'include' });
+            workspaces = await response.json();
+            renderWorkspaces();
+        } catch (error) {
+            console.error('Error loading workspaces:', error);
+        }
+    }
+
+    async function loadMyBookings() {
+        try {
+            const response = await fetch('/api/bookings/my', { credentials: 'include' });
+            myBookings = await response.json();
+            renderMyBookings();
+        } catch (error) {
+            console.error('Error loading bookings:', error);
+        }
+    }
+
+    function renderWorkspaces() {
+        const container = document.getElementById('workspacesGrid');
+        if (!container) return;
+
+        container.innerHTML = workspaces.map(ws => {
+            // Проверка занятости сейчас
+            const now = new Date();
+            const isOccupied = myBookings.some(b =>
+                b.workspaceId === ws.id &&
+                new Date(b.startTime) <= now &&
+                new Date(b.endTime) >= now
+            );
+
+            return `
+                <div class="workspace-card">
+                    <div class="workspace-name">${escapeHtml(ws.name)}</div>
+                    <div class="workspace-desc">${escapeHtml(ws.description || 'Комфортное рабочее место')}</div>
+                    <div class="workspace-price">${ws.hourlyRate}<span> ₽/час</span></div>
+                    <div class="workspace-status ${isOccupied ? 'status-busy' : 'status-free'}">
+                        ${isOccupied ? '🔴 Занято сейчас' : '🟢 Свободно'}
+                    </div>
+                    <button class="btn-book" onclick="openBookingModal(${ws.id}, '${escapeHtml(ws.name)}', ${ws.hourlyRate})"
+                        ${isOccupied ? 'disabled' : ''}>
+                        ${isOccupied ? 'Занято' : 'Забронировать'}
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderMyBookings() {
+        const container = document.getElementById('bookingsList');
+        const activeBookings = myBookings.filter(b => new Date(b.endTime) > new Date());
+
+        if (activeBookings.length === 0) {
+            container.innerHTML = '<div class="empty-state">📭 У вас нет активных бронирований</div>';
+            return;
+        }
+
+        container.innerHTML = activeBookings.map(b => {
+            const start = new Date(b.startTime).toLocaleString();
+            const end = new Date(b.endTime).toLocaleString();
+            const workspace = workspaces.find(w => w.id === b.workspaceId);
+            return `
+                <div class="booking-item">
+                    <div class="booking-info">
+                        <h4>${workspace ? workspace.name : 'Место'}</h4>
+                        <p>📅 ${start} — ${end}</p>
+                    </div>
+                    <div class="booking-price">₽ ${b.totalPrice || 'расчет позже'}</div>
+                    <button class="btn-cancel" onclick="cancelBooking(${b.id})">Отменить</button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function openBookingModal(workspaceId, workspaceName, hourlyRate) {
+        document.getElementById('bookWorkspaceId').value = workspaceId;
+        document.getElementById('bookWorkspaceName').innerHTML = workspaceName;
+        document.getElementById('bookStart').value = '';
+        document.getElementById('bookEnd').value = '';
+        document.getElementById('bookPrice').innerHTML = '';
+        document.getElementById('bookingModal').style.display = 'flex';
+
+        // Добавляем расчет стоимости
+        const startInput = document.getElementById('bookStart');
+        const endInput = document.getElementById('bookEnd');
+
+        const calculatePrice = () => {
+            if (startInput.value && endInput.value) {
+                const start = new Date(startInput.value);
+                const end = new Date(endInput.value);
+                if (start < end) {
+                    const hours = (end - start) / (1000 * 60 * 60);
+                    const roundedHours = Math.ceil(hours * 4) / 4;
+                    const price = roundedHours * hourlyRate;
+                    document.getElementById('bookPrice').innerHTML = `💰 Итого: ${price.toFixed(2)} ₽`;
+                }
+            }
+        };
+
+        startInput.onchange = calculatePrice;
+        endInput.onchange = calculatePrice;
+    }
+
+    async function confirmBooking() {
+        const workspaceId = parseInt(document.getElementById('bookWorkspaceId').value);
+        const startTime = document.getElementById('bookStart').value;
+        const endTime = document.getElementById('bookEnd').value;
+
+        if (!startTime || !endTime) {
+            showToast('Выберите время', true);
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/bookings/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ workspaceId, startTime, endTime })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                showToast('✅ Бронирование успешно создано!');
+                closeModal();
+                loadWorkspaces();
+                loadMyBookings();
+            } else {
+                showToast(result.message || 'Ошибка бронирования', true);
+            }
+        } catch (error) {
+            showToast('Ошибка соединения с сервером', true);
+        }
+    }
+
+    async function cancelBooking(bookingId) {
+        try {
+            const response = await fetch(`/api/bookings/${bookingId}/cancel`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            const result = await response.json();
+            if (result.success) {
+                showToast('Бронирование отменено');
+                loadMyBookings();
+                loadWorkspaces();
+            }
+        } catch (error) {
+            showToast('Ошибка отмены', true);
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('bookingModal').style.display = 'none';
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.style.backgroundColor = isError ? '#f56565' : '#48bb78';
+        toast.textContent = message;
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 3000);
+    }
+
+    async function logout() {
+        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+        window.location.href = '/';
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Инициализация
+    window.onclick = function(event) {
+        if (event.target.classList && event.target.classList.contains('modal')) {
+            closeModal();
+        }
+    };
+
+    loadUser().then(() => {
+        loadWorkspaces();
+        loadMyBookings();
+    });
+</script>
+</body>
+</html>
