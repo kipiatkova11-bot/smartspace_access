@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>История бронирований - SmartSpace Access</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo h2 {
+            color: #667eea;
+        }
+
+        .nav {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .nav a:hover {
+            color: #667eea;
+        }
+
+        .btn-logout {
+            background: #f56565;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #718096;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .bookings-list {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .booking-item {
+            border-bottom: 1px solid #e2e8f0;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            transition: background 0.2s;
+        }
+
+        .booking-item:hover {
+            background: #f7fafc;
+        }
+
+        .booking-info h4 {
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .booking-info p {
+            color: #718096;
+            font-size: 14px;
+            margin: 4px 0;
+        }
+
+        .booking-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        .status-confirmed { background: #c6f6d5; color: #22543d; }
+        .status-checked_in { background: #fefcbf; color: #975a16; }
+        .status-completed { background: #e2e8f0; color: #2d3748; }
+        .status-cancelled { background: #fed7d7; color: #742a2a; }
+
+        .booking-price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .booking-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-invoice {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-cancel {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #a0aec0;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .toast.error {
+            background: #f56565;
+        }
+
+        @media (max-width: 768px) {
+            .booking-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .nav {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="logo">
+        <h2>🚀 SmartSpace Access</h2>
+    </div>
+    <div class="nav">
+        <a href="dashboard.html">📅 Бронирования</a>
+        <a href="history.html" style="color: #667eea;">📋 История</a>
+        <a href="invoices.html">💰 Счета</a>
+        <a href="profile.html">👤 Профиль</a>
+        <button class="btn-logout" onclick="logout()">Выйти</button>
+    </div>
+</div>
+
+<div class="container">
+    <h1 class="page-title">📋 История бронирований</h1>
+    <p class="page-subtitle">Все ваши бронирования: активные, завершённые и отменённые</p>
+
+    <div class="tabs">
+        <div class="tab active" data-filter="all">Все</div>
+        <div class="tab" data-filter="active">Активные</div>
+        <div class="tab" data-filter="completed">Завершённые</div>
+        <div class="tab" data-filter="cancelled">Отменённые</div>
+    </div>
+
+    <div class="bookings-list" id="bookingsList">
+        <div class="empty-state">⏳ Загрузка...</div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    let allBookings = [];
+    let workspaces = [];
+    let currentFilter = 'all';
+
+    async function loadData() {
+        try {
+            // Загрузка бронирований
+            const bookingsResp = await fetch('/api/bookings/my', { credentials: 'include' });
+            if (bookingsResp.ok) {
+                allBookings = await bookingsResp.json();
+            }
+
+            // Загрузка рабочих мест
+            const workspacesResp = await fetch('/api/bookings/workspaces', { credentials: 'include' });
+            if (workspacesResp.ok) {
+                workspaces = await workspacesResp.json();
+            }
+
+            renderBookings();
+        } catch (error) {
+            showToast('Ошибка загрузки данных', true);
+        }
+    }
+
+    function renderBookings() {
+        const container = document.getElementById('bookingsList');
+
+        let filtered = allBookings;
+        if (currentFilter === 'active') {
+            filtered = allBookings.filter(b =>
+                b.status === 'CONFIRMED' || b.status === 'CHECKED_IN'
+            );
+        } else if (currentFilter === 'completed') {
+            filtered = allBookings.filter(b => b.status === 'COMPLETED');
+        } else if (currentFilter === 'cancelled') {
+            filtered = allBookings.filter(b => b.status === 'CANCELLED');
+        }
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="empty-state">📭 Нет бронирований в этой категории</div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(booking => {
+            const workspace = workspaces.find(w => w.id === booking.workspaceId);
+            const start = new Date(booking.startTime).toLocaleString();
+            const end = new Date(booking.endTime).toLocaleString();
+            const isActive = booking.status === 'CONFIRMED' || booking.status === 'CHECKED_IN';
+
+            let statusText = '';
+            let statusClass = '';
+            if (booking.status === 'CONFIRMED') { statusText = 'Подтверждено'; statusClass = 'status-confirmed'; }
+            else if (booking.status === 'CHECKED_IN') { statusText = 'На месте'; statusClass = 'status-checked_in'; }
+            else if (booking.status === 'COMPLETED') { statusText = 'Завершено'; statusClass = 'status-completed'; }
+            else if (booking.status === 'CANCELLED') { statusText = 'Отменено'; statusClass = 'status-cancelled'; }
+
+            return `
+                <div class="booking-item">
+                    <div class="booking-info">
+                        <h4>${workspace ? workspace.name : 'Место #' + booking.workspaceId}</h4>
+                        <p>📅 ${start} — ${end}</p>
+                        <p>🏢 ${workspace ? workspace.description || 'Рабочее место' : ''}</p>
+                        <span class="booking-status ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="booking-price">
+                        ${booking.totalPrice ? booking.totalPrice + ' ₽' : '— ₽'}
+                    </div>
+                    <div class="booking-actions">
+                        ${booking.status === 'COMPLETED' ?
+                            `<button class="btn-small btn-invoice" onclick="viewInvoice(${booking.id})">💰 Квитанция</button>` : ''}
+                        ${isActive ?
+                            `<button class="btn-small btn-cancel" onclick="cancelBooking(${booking.id})">❌ Отменить</button>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function cancelBooking(bookingId) {
+        if (!confirm('Вы уверены, что хотите отменить бронирование?')) return;
+
+        try {
+            const response = await fetch(`/api/bookings/${bookingId}/cancel`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            const result = await response.json();
+            if (result.success) {
+                showToast('Бронирование отменено');
+                loadData();
+            } else {
+                showToast('Ошибка отмены', true);
+            }
+        } catch (error) {
+            showToast('Ошибка соединения', true);
+        }
+    }
+
+    function viewInvoice(bookingId) {
+        window.location.href = `/invoices.html?bookingId=${bookingId}`;
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = isError ? 'toast error' : 'toast';
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 3000);
+    }
+
+    async function logout() {
+        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+        window.location.href = '/';
+    }
+
+    // Вкладки
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentFilter = tab.dataset.filter;
+            renderBookings();
+        });
+    });
+
+    // Проверка авторизации
+    async function checkAuth() {
+        const response = await fetch('/api/auth/me', { credentials: 'include' });
+        if (!response.ok) {
+            window.location.href = '/login.html';
+        }
+    }
+
+    checkAuth();
+    loadData();
+</script>
+</body>
+</html>

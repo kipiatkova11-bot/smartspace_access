@@ -14,6 +14,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByClientId(Long clientId);
     List<Booking> findByWorkspaceId(Long workspaceId);
     List<Booking> findByClientIdAndStatus(Long clientId, BookingStatus status);
+    List<Booking> findByStatus(BookingStatus status);
 
     @Query("SELECT COUNT(b) > 0 FROM Booking b WHERE " +
             "b.workspaceId = :workspaceId AND " +

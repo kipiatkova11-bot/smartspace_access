@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель - SmartSpace Access</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: #1a1a2e;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo h2 {
+            color: #667eea;
+        }
+
+        .logo p {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn-logout {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-logout:hover {
+            background: #b91c1c;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: #e2e8f0;
+        }
+
+        /* Panels */
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 10px;
+        }
+
+        /* Tables */
+        .table-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            overflow-x: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-confirmed { background: #c6f6d5; color: #22543d; }
+        .status-checked_in { background: #fefcbf; color: #975a16; }
+        .status-completed { background: #e2e8f0; color: #475569; }
+        .status-cancelled { background: #fed7d7; color: #742a2a; }
+
+        .btn-small {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            margin: 2px;
+        }
+
+        .btn-checkin {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-checkout {
+            background: #ed8936;
+            color: white;
+        }
+
+        .btn-calc {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-refresh {
+            background: #4299e1;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .toast.error {
+            background: #f56565;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 15px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            th, td {
+                font-size: 12px;
+                padding: 8px;
+            }
+            .tab-btn {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="logo">
+        <h2>🚀 SmartSpace Access | Админ-панель</h2>
+        <p>Управление бронированиями и посещениями</p>
+    </div>
+    <div class="user-info">
+        <span id="userName"></span>
+        <button class="btn-logout" onclick="logout()">Выйти</button>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="pending">⏳ Ожидают отметки</button>
+        <button class="tab-btn" data-tab="active">🟢 Активные посещения</button>
+        <button class="tab-btn" data-tab="all">📋 Все бронирования</button>
+        <button class="tab-btn" data-tab="stats">📊 Статистика</button>
+    </div>
+
+    <!-- Panel: Ожидают отметки -->
+    <div id="pendingPanel" class="tab-panel active">
+        <div class="table-container">
+            <div style="margin-bottom: 15px;">
+                <button class="btn-refresh" onclick="loadPendingCheckins()">🔄 Обновить</button>
+            </div>
+            <table id="pendingTable">
+                <thead>
+                <tr><th>ID</th><th>Клиент</th><th>Место</th><th>Начало</th><th>Конец</th><th>Действия</th></tr>
+                </thead>
+                <tbody id="pendingTableBody">
+                <tr><td colspan="6" style="text-align: center;">Загрузка...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Panel: Активные посещения -->
+    <div id="activePanel" class="tab-panel">
+        <div class="table-container">
+            <div style="margin-bottom: 15px;">
+                <button class="btn-refresh" onclick="loadActiveVisits()">🔄 Обновить</button>
+            </div>
+            <table id="activeTable">
+                <thead><tr><th>ID брони</th><th>Клиент</th><th>Место</th><th>Время прихода</th><th>Действия</th></tr></thead>
+                <tbody id="activeTableBody">
+                <tr><td colspan="5" style="text-align: center;">Загрузка...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Panel: Все бронирования -->
+    <div id="allPanel" class="tab-panel">
+        <div class="table-container">
+            <div style="margin-bottom: 15px;">
+                <button class="btn-refresh" onclick="loadAllBookings()">🔄 Обновить</button>
+            </div>
+            <table id="allTable">
+                <thead><tr><th>ID</th><th>Клиент</th><th>Место</th><th>Начало</th><th>Конец</th><th>Статус</th><th>Стоимость</th><th>Действия</th></tr></thead>
+                <tbody id="allTableBody">
+                <tr><td colspan="8" style="text-align: center;">Загрузка...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Panel: Статистика -->
+    <div id="statsPanel" class="tab-panel">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="statTotal">0</div>
+                <div class="stat-label">Всего бронирований</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statActive">0</div>
+                <div class="stat-label">Активных сейчас</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statToday">0</div>
+                <div class="stat-label">Сегодня</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statRevenue">0 ₽</div>
+                <div class="stat-label">Выручка (завершённые)</div>
+            </div>
+        </div>
+        <div class="table-container">
+            <h3 style="margin-bottom: 15px;">📈 Последние операции</h3>
+            <table id="statsTable">
+                <thead><tr><th>Дата</th><th>Бронирование</th><th>Клиент</th><th>Сумма</th></tr></thead>
+                <tbody id="statsTableBody">
+                <tr><td colspan="4" style="text-align: center;">Загрузка...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal для подтверждения -->
+<div id="confirmModal" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitle">Подтверждение</h3>
+        <p id="modalMessage"></p>
+        <div class="modal-buttons">
+            <button class="btn-small btn-checkin" id="modalConfirmBtn">Подтвердить</button>
+            <button class="btn-small" style="background:#cbd5e0;" onclick="closeModal()">Отмена</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    let currentUser = null;
+    let pendingAction = null;
+    let pendingBookingId = null;
+
+    // Проверка авторизации и роли
+    async function checkAuth() {
+        try {
+            const response = await fetch('/api/auth/me', { credentials: 'include' });
+            if (response.ok) {
+                currentUser = await response.json();
+                document.getElementById('userName').innerHTML = `👑 ${currentUser.fullName} (Администратор)`;
+
+                if (currentUser.role !== 'ADMIN') {
+                    showToast('У вас нет прав администратора. Перенаправление...', true);
+                    setTimeout(() => window.location.href = '/dashboard.html', 1500);
+                    return false;
+                }
+                return true;
+            }
+        } catch (error) {
+            console.error('Auth error:', error);
+        }
+        window.location.href = '/login.html';
+        return false;
+    }
+
+    // Показать уведомление
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = isError ? 'toast error' : 'toast';
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 3000);
+    }
+
+    function closeModal() {
+        document.getElementById('confirmModal').style.display = 'none';
+        pendingAction = null;
+        pendingBookingId = null;
+    }
+
+    function openConfirmModal(title, message, action, bookingId) {
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalMessage').textContent = message;
+        pendingAction = action;
+        pendingBookingId = bookingId;
+        document.getElementById('confirmModal').style.display = 'flex';
+    }
+
+    document.getElementById('modalConfirmBtn').onclick = async () => {
+        if (pendingAction && pendingBookingId) {
+            await pendingAction(pendingBookingId);
+        }
+        closeModal();
+    };
+
+    // Отметка прихода
+    async function checkIn(bookingId) {
+        try {
+            const response = await fetch(`/api/visits/${bookingId}/checkin`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            const result = await response.json();
+            if (result.success) {
+                showToast(`✅ Приход отмечен для бронирования #${bookingId}`);
+                loadPendingCheckins();
+                loadActiveVisits();
+                loadAllBookings();
+            } else {
+                showToast(result.error || 'Ошибка отметки прихода', true);
+            }
+        } catch (error) {
+            showToast('Ошибка соединения', true);
+        }
+    }
+
+    // Отметка ухода
+    async function checkOut(bookingId) {
+        try {
+            const response = await fetch(`/api/visits/${bookingId}/checkout`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            const result = await response.json();
+            if (result.success) {
+                showToast(`✅ Уход отмечен. Стоимость: ${result.cost} ₽`);
+                loadPendingCheckins();
+                loadActiveVisits();
+                loadAllBookings();
+                loadStats();
+            } else {
+                showToast(result.error || 'Ошибка отметки ухода', true);
+            }
+        } catch (error) {
+            showToast('Ошибка соединения', true);
+        }
+    }
+
+    // Принудительный расчёт (тестовый метод)
+    async function calculateFromBooking(bookingId) {
+        try {
+            const response = await fetch(`/api/visits/${bookingId}/calculate-from-booking`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            const result = await response.json();
+            if (result.success) {
+                showToast(`💰 Расчёт выполнен: ${result.cost} ₽ (${result.totalHours} ч)`);
+                loadAllBookings();
+                loadStats();
+            } else {
+                showToast(result.error || 'Ошибка расчёта', true);
+            }
+        } catch (error) {
+            showToast('Ошибка соединения', true);
+        }
+    }
+
+    // Загрузка бронирований, ожидающих отметки
+    async function loadPendingCheckins() {
+        try {
+            const response = await fetch('/api/visits/pending-checkins', { credentials: 'include' });
+            const data = await response.json();
+            const tbody = document.getElementById('pendingTableBody');
+
+            if (!data.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">📭 Нет бронирований, ожидающих отметки</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(item => `
+                <tr>
+                    <td>${item.bookingId}</td>
+                    <td>Клиент #${item.clientId}</td>
+                    <td>Место #${item.workspaceId}</td>
+                    <td>${new Date(item.startTime).toLocaleString()}</td>
+                    <td>${new Date(item.endTime).toLocaleString()}</td>
+                    <td>
+                        <button class="btn-small btn-checkin" onclick="openConfirmModal('Отметка прихода', 'Отметить приход для бронирования #${item.bookingId}?', checkIn, ${item.bookingId})">✅ Приход</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // Загрузка активных посещений
+    async function loadActiveVisits() {
+        try {
+            const response = await fetch('/api/visits/active', { credentials: 'include' });
+            const data = await response.json();
+            const tbody = document.getElementById('activeTableBody');
+
+            if (!data.length) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">🟢 Нет активных посещений</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(item => `
+                <tr>
+                    <td>${item.bookingId}</td>
+                    <td>Клиент #${item.clientId}</td>
+                    <td>Место #${item.workspaceId}</td>
+                    <td>${item.checkInTime ? new Date(item.checkInTime).toLocaleString() : '—'}</td>
+                    <td>
+                        <button class="btn-small btn-checkout" onclick="openConfirmModal('Отметка ухода', 'Отметить уход для бронирования #${item.bookingId}? Будет рассчитана стоимость.', checkOut, ${item.bookingId})">💰 Уход</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // Загрузка всех бронирований
+    async function loadAllBookings() {
+        try {
+            const response = await fetch('/api/bookings/my', { credentials: 'include' });
+            let data = await response.json();
+
+            // Если API возвращает только пользовательские, нужен админский эндпоинт
+            // Используем /api/bookings/all, если есть, иначе показываем доступные
+            const tbody = document.getElementById('allTableBody');
+
+            if (!data.length) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">📋 Нет бронирований</td></tr>';
+                return;
+            }
+
+            // Загружаем имена клиентов (упрощённо, через отдельный запрос)
+            tbody.innerHTML = data.map(b => {
+                let statusClass = '';
+                if (b.status === 'CONFIRMED') statusClass = 'status-confirmed';
+                else if (b.status === 'CHECKED_IN') statusClass = 'status-checked_in';
+                else if (b.status === 'COMPLETED') statusClass = 'status-completed';
+                else if (b.status === 'CANCELLED') statusClass = 'status-cancelled';
+
+                let statusText = '';
+                if (b.status === 'CONFIRMED') statusText = 'Подтверждено';
+                else if (b.status === 'CHECKED_IN') statusText = 'На месте';
+                else if (b.status === 'COMPLETED') statusText = 'Завершено';
+                else if (b.status === 'CANCELLED') statusText = 'Отменено';
+                else statusText = b.status;
+
+                return `
+                    <tr>
+                        <td>${b.id}</td>
+                        <td>Клиент #${b.clientId}</td>
+                        <td>Место #${b.workspaceId}</td>
+                        <td>${new Date(b.startTime).toLocaleString()}</td>
+                        <td>${new Date(b.endTime).toLocaleString()}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${b.totalPrice ? b.totalPrice + ' ₽' : '—'}</td>
+                        <td>
+                            ${b.status === 'CONFIRMED' ? `<button class="btn-small btn-checkin" onclick="openConfirmModal('Отметка', 'Отметить приход?', checkIn, ${b.id})">✅</button>` : ''}
+                            ${b.status === 'CHECKED_IN' ? `<button class="btn-small btn-checkout" onclick="openConfirmModal('Отметка', 'Отметить уход и рассчитать стоимость?', checkOut, ${b.id})">💰</button>` : ''}
+                            <button class="btn-small btn-calc" onclick="openConfirmModal('Расчёт', 'Принудительно рассчитать стоимость по времени бронирования?', calculateFromBooking, ${b.id})">🧮</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('allTableBody').innerHTML = '<tr><td colspan="8" style="text-align: center;">Ошибка загрузки</td></tr>';
+        }
+    }
+
+    // Загрузка статистики
+    async function loadStats() {
+        try {
+            const response = await fetch('/api/bookings/my', { credentials: 'include' });
+            const bookings = await response.json();
+
+            const total = bookings.length;
+            const activeNow = bookings.filter(b =>
+                b.status === 'CHECKED_IN' || (b.status === 'CONFIRMED' && new Date(b.startTime) <= new Date() && new Date(b.endTime) >= new Date())
+            ).length;
+            const today = bookings.filter(b => new Date(b.startTime).toDateString() === new Date().toDateString()).length;
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statActive').textContent = activeNow;
+            document.getElementById('statToday').textContent = today;
+
+            // Получаем завершённые с visitRepository через visitService
+            const visitsResp = await fetch('/api/visits/all', { credentials: 'include' }).catch(() => null);
+            if (visitsResp && visitsResp.ok) {
+                const visits = await visitsResp.json();
+                const revenue = visits.reduce((sum, v) => sum + (v.calculatedCost || 0), 0);
+                document.getElementById('statRevenue').innerHTML = revenue.toFixed(2) + ' ₽';
+            } else {
+                document.getElementById('statRevenue').innerHTML = '—';
+            }
+
+            const statsBody = document.getElementById('statsTableBody');
+            const completed = bookings.filter(b => b.status === 'COMPLETED').slice(0, 10);
+            if (!completed.length) {
+                statsBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Нет завершённых операций</td></tr>';
+            } else {
+                statsBody.innerHTML = completed.map(b => `
+                    <tr>
+                        <td>${new Date(b.startTime).toLocaleDateString()}</td>
+                        <td>#${b.id}</td>
+                        <td>Клиент #${b.clientId}</td>
+                        <td>${b.totalPrice || '—'} ₽</td>
+                    </tr>
+                `).join('');
+            }
+        } catch (error) {
+            console.error('Stats error:', error);
+        }
+    }
+
+    // Вкладки
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabName = btn.dataset.tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(`${tabName}Panel`).classList.add('active');
+
+            if (tabName === 'pending') loadPendingCheckins();
+            if (tabName === 'active') loadActiveVisits();
+            if (tabName === 'all') loadAllBookings();
+            if (tabName === 'stats') loadStats();
+        });
+    });
+
+    async function logout() {
+        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+        window.location.href = '/';
+    }
+
+    // Инициализация
+    window.onclick = (event) => {
+        if (event.target.classList && event.target.classList.contains('modal')) {
+            closeModal();
+        }
+    };
+
+    checkAuth().then(isAdmin => {
+        if (isAdmin) {
+            loadPendingCheckins();
+            loadActiveVisits();
+            loadAllBookings();
+            loadStats();
+        }
+    });
+</script>
+</body>
+</html>

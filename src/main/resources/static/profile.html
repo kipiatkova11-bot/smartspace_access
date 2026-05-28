@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет - SmartSpace Access</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo h2 {
+            color: #667eea;
+        }
+
+        .nav {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .nav a:hover {
+            color: #667eea;
+        }
+
+        .btn-logout {
+            background: #f56565;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 36px;
+            color: white;
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .profile-email {
+            color: #718096;
+            margin-top: 5px;
+        }
+
+        .info-row {
+            display: flex;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .info-label {
+            width: 120px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .info-value {
+            flex: 1;
+            color: #2d3748;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: #2d3748;
+            margin: 25px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-save {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .btn-save:hover {
+            background: #5a67d8;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .toast.error {
+            background: #f56565;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="logo">
+        <h2>🚀 SmartSpace Access</h2>
+    </div>
+    <div class="nav">
+        <a href="dashboard.html">📅 Бронирования</a>
+        <a href="history.html">📋 История</a>
+        <a href="invoices.html">💰 Счета</a>
+        <a href="profile.html" style="color: #667eea;">👤 Профиль</a>
+        <button class="btn-logout" onclick="logout()">Выйти</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="avatar">👤</div>
+            <div class="profile-name" id="userName">Загрузка...</div>
+            <div class="profile-email" id="userEmail">-</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Телефон</div>
+            <div class="info-value" id="userPhone">-</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">Роль</div>
+            <div class="info-value" id="userRole">-</div>
+        </div>
+        <div class="info-row">
+            <div class="info-label">ID пользователя</div>
+            <div class="info-value" id="userId">-</div>
+        </div>
+
+        <div class="section-title">🔒 Смена пароля</div>
+        <form id="passwordForm">
+            <div class="form-group">
+                <label>Текущий пароль</label>
+                <input type="password" id="currentPassword" required>
+            </div>
+            <div class="form-group">
+                <label>Новый пароль (мин. 6 символов)</label>
+                <input type="password" id="newPassword" required minlength="6">
+            </div>
+            <div class="form-group">
+                <label>Подтверждение нового пароля</label>
+                <input type="password" id="confirmPassword" required>
+            </div>
+            <button type="submit" class="btn-save">Изменить пароль</button>
+        </form>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    let currentUser = null;
+
+    async function loadProfile() {
+        try {
+            const response = await fetch('/api/auth/me', { credentials: 'include' });
+            if (response.ok) {
+                currentUser = await response.json();
+                document.getElementById('userName').textContent = currentUser.fullName;
+                document.getElementById('userEmail').textContent = currentUser.email;
+                document.getElementById('userPhone').textContent = currentUser.phone || 'Не указан';
+                document.getElementById('userRole').textContent = currentUser.role === 'CLIENT' ? 'Клиент' : currentUser.role;
+                document.getElementById('userId').textContent = currentUser.id;
+            } else {
+                window.location.href = '/login.html';
+            }
+        } catch (error) {
+            showToast('Ошибка загрузки профиля', true);
+        }
+    }
+
+    document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (newPassword !== confirmPassword) {
+            showToast('Новый пароль и подтверждение не совпадают', true);
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            showToast('Пароль должен быть не менее 6 символов', true);
+            return;
+        }
+
+        // В демо-версии показываем уведомление
+        // В реальном проекте: POST /api/auth/change-password
+        showToast('🔐 Функция смены пароля будет добавлена в следующей версии');
+
+        // Очистка формы
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+    });
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = isError ? 'toast error' : 'toast';
+        toast.style.display = 'block';
+        setTimeout(() => toast.style.display = 'none', 3000);
+    }
+
+    async function logout() {
+        await fetch('/api/auth/log

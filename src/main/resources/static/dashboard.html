@@ -20,24 +20,34 @@
         /* Header */
         .header {
             background: white;
-            padding: 15px 40px;
+            padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .logo h2 {
             color: #667eea;
         }
 
-        .user-info {
+        .nav {
             display: flex;
-            align-items: center;
             gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .nav a:hover {
+            color: #667eea;
         }
 
         .btn-logout {
@@ -70,11 +80,18 @@
             margin-bottom: 10px;
         }
 
+        .welcome-banner p {
+            opacity: 0.9;
+        }
+
         /* Workspaces Grid */
         .section-title {
             font-size: 24px;
-            color: #333;
+            color: #2d3748;
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .workspaces-grid {
@@ -86,9 +103,9 @@
 
         .workspace-card {
             background: white;
-            border-radius: 15px;
+            border-radius: 20px;
             padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             transition: transform 0.3s;
         }
 
@@ -99,18 +116,18 @@
         .workspace-name {
             font-size: 20px;
             font-weight: bold;
-            color: #333;
+            color: #2d3748;
             margin-bottom: 10px;
         }
 
         .workspace-desc {
-            color: #666;
+            color: #718096;
             font-size: 14px;
             margin-bottom: 15px;
         }
 
         .workspace-price {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             color: #667eea;
             margin-bottom: 10px;
@@ -118,12 +135,12 @@
 
         .workspace-price span {
             font-size: 14px;
-            color: #666;
+            color: #718096;
         }
 
         .workspace-status {
             display: inline-block;
-            padding: 5px 10px;
+            padding: 5px 12px;
             border-radius: 20px;
             font-size: 12px;
             margin-bottom: 15px;
@@ -143,11 +160,17 @@
             width: 100%;
             background: #667eea;
             color: white;
-            padding: 10px;
+            padding: 12px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .btn-book:hover {
+            background: #5a67d8;
         }
 
         .btn-book:disabled {
@@ -161,6 +184,7 @@
             border-radius: 20px;
             padding: 25px;
             margin-top: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
 
         .booking-item {
@@ -170,15 +194,20 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .booking-item:last-child {
+            border-bottom: none;
         }
 
         .booking-info h4 {
-            color: #333;
+            color: #2d3748;
             margin-bottom: 5px;
         }
 
         .booking-info p {
-            color: #666;
+            color: #718096;
             font-size: 12px;
         }
 
@@ -192,7 +221,7 @@
             background: #fed7d7;
             color: #742a2a;
             border: none;
-            padding: 5px 15px;
+            padding: 6px 15px;
             border-radius: 8px;
             cursor: pointer;
         }
@@ -200,7 +229,7 @@
         .empty-state {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color: #a0aec0;
         }
 
         /* Modal */
@@ -227,14 +256,31 @@
 
         .modal-content h2 {
             margin-bottom: 20px;
+            color: #2d3748;
         }
 
         .modal-content input {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .price-preview {
+            background: #f7fafc;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+            margin: 15px 0;
         }
 
         .modal-buttons {
@@ -243,6 +289,11 @@
             margin-top: 20px;
         }
 
+        .modal-buttons button {
+            flex: 1;
+        }
+
+        /* Toast */
         .toast {
             position: fixed;
             bottom: 20px;
@@ -254,6 +305,24 @@
             display: none;
             z-index: 1100;
         }
+
+        .toast.error {
+            background: #f56565;
+        }
+
+        @media (max-width: 768px) {
+            .workspaces-grid {
+                grid-template-columns: 1fr;
+            }
+            .booking-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .nav {
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -261,8 +330,11 @@
     <div class="logo">
         <h2>🚀 SmartSpace Access</h2>
     </div>
-    <div class="user-info">
-        <span id="userName"></span>
+    <div class="nav">
+        <a href="dashboard.html" style="color: #667eea;">📅 Бронирования</a>
+        <a href="history.html">📋 История</a>
+        <a href="invoices.html">💰 Счета</a>
+        <a href="profile.html">👤 Профиль</a>
         <button class="btn-logout" onclick="logout()">Выйти</button>
     </div>
 </div>
@@ -273,11 +345,15 @@
         <p>Бронируйте рабочие места, управляйте временем и получайте счета онлайн</p>
     </div>
 
-    <div class="section-title">🔥 Доступные рабочие места</div>
+    <div class="section-title">
+        <span>🔥 Доступные рабочие места</span>
+    </div>
     <div class="workspaces-grid" id="workspacesGrid"></div>
 
     <div class="bookings-section">
-        <div class="section-title">📋 Мои активные бронирования</div>
+        <div class="section-title">
+            <span>📋 Мои активные бронирования</span>
+        </div>
         <div id="bookingsList"></div>
     </div>
 </div>
@@ -292,7 +368,7 @@
         <input type="datetime-local" id="bookStart" required>
         <label>Окончание:</label>
         <input type="datetime-local" id="bookEnd" required>
-        <p id="bookPrice" style="color: #667eea; font-weight: bold; margin-top: 10px;"></p>
+        <div class="price-preview" id="pricePreview">— ₽</div>
         <div class="modal-buttons">
             <button class="btn-book" onclick="confirmBooking()">Подтвердить</button>
             <button class="btn-book" style="background: #cbd5e0;" onclick="closeModal()">Отмена</button>
@@ -307,13 +383,12 @@
     let workspaces = [];
     let myBookings = [];
 
-    // Загрузка данных
+    // Загрузка пользователя
     async function loadUser() {
         try {
             const response = await fetch('/api/auth/me', { credentials: 'include' });
             if (response.ok) {
                 currentUser = await response.json();
-                document.getElementById('userName').innerHTML = `👋 ${currentUser.fullName}`;
                 document.getElementById('welcomeMessage').innerHTML = `Привет, ${currentUser.fullName}!`;
                 return true;
             }
@@ -324,6 +399,7 @@
         return false;
     }
 
+    // Загрузка рабочих мест
     async function loadWorkspaces() {
         try {
             const response = await fetch('/api/bookings/workspaces', { credentials: 'include' });
@@ -334,6 +410,7 @@
         }
     }
 
+    // Загрузка моих бронирований
     async function loadMyBookings() {
         try {
             const response = await fetch('/api/bookings/my', { credentials: 'include' });
@@ -348,11 +425,17 @@
         const container = document.getElementById('workspacesGrid');
         if (!container) return;
 
+        if (workspaces.length === 0) {
+            container.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;">🏢 Рабочие места будут добавлены администратором</div>';
+            return;
+        }
+
         container.innerHTML = workspaces.map(ws => {
             // Проверка занятости сейчас
             const now = new Date();
             const isOccupied = myBookings.some(b =>
                 b.workspaceId === ws.id &&
+                b.status === 'CONFIRMED' &&
                 new Date(b.startTime) <= now &&
                 new Date(b.endTime) >= now
             );
@@ -376,7 +459,9 @@
 
     function renderMyBookings() {
         const container = document.getElementById('bookingsList');
-        const activeBookings = myBookings.filter(b => new Date(b.endTime) > new Date());
+        const activeBookings = myBookings.filter(b =>
+            b.status === 'CONFIRMED' && new Date(b.endTime) > new Date()
+        );
 
         if (activeBookings.length === 0) {
             container.innerHTML = '<div class="empty-state">📭 У вас нет активных бронирований</div>';
@@ -387,13 +472,22 @@
             const start = new Date(b.startTime).toLocaleString();
             const end = new Date(b.endTime).toLocaleString();
             const workspace = workspaces.find(w => w.id === b.workspaceId);
+
+            // Расчет примерной стоимости
+            const startDate = new Date(b.startTime);
+            const endDate = new Date(b.endTime);
+            const hours = (endDate - startDate) / (1000 * 60 * 60);
+            const roundedHours = Math.ceil(hours * 4) / 4;
+            const estimatedPrice = workspace ? (roundedHours * workspace.hourlyRate).toFixed(2) : '—';
+
             return `
                 <div class="booking-item">
                     <div class="booking-info">
-                        <h4>${workspace ? workspace.name : 'Место'}</h4>
+                        <h4>${workspace ? workspace.name : 'Место #' + b.workspaceId}</h4>
                         <p>📅 ${start} — ${end}</p>
+                        <p>💰 Примерная стоимость: ${estimatedPrice} ₽</p>
                     </div>
-                    <div class="booking-price">₽ ${b.totalPrice || 'расчет позже'}</div>
+                    <div class="booking-price">${estimatedPrice} ₽</div>
                     <button class="btn-cancel" onclick="cancelBooking(${b.id})">Отменить</button>
                 </div>
             `;
@@ -405,10 +499,9 @@
         document.getElementById('bookWorkspaceName').innerHTML = workspaceName;
         document.getElementById('bookStart').value = '';
         document.getElementById('bookEnd').value = '';
-        document.getElementById('bookPrice').innerHTML = '';
+        document.getElementById('pricePreview').innerHTML = '— ₽';
         document.getElementById('bookingModal').style.display = 'flex';
 
-        // Добавляем расчет стоимости
         const startInput = document.getElementById('bookStart');
         const endInput = document.getElementById('bookEnd');
 
@@ -416,11 +509,15 @@
             if (startInput.value && endInput.value) {
                 const start = new Date(startInput.value);
                 const end = new Date(endInput.value);
-                if (start < end) {
+                if (start < end && start > new Date()) {
                     const hours = (end - start) / (1000 * 60 * 60);
                     const roundedHours = Math.ceil(hours * 4) / 4;
-                    const price = roundedHours * hourlyRate;
-                    document.getElementById('bookPrice').innerHTML = `💰 Итого: ${price.toFixed(2)} ₽`;
+                    const price = (roundedHours * hourlyRate).toFixed(2);
+                    document.getElementById('pricePreview').innerHTML = `💰 Итого: ${price} ₽`;
+                } else if (start <= new Date()) {
+                    document.getElementById('pricePreview').innerHTML = '❌ Нельзя бронировать прошлое время';
+                } else {
+                    document.getElementById('pricePreview').innerHTML = '⏳ Выберите корректное время';
                 }
             }
         };
@@ -436,6 +533,12 @@
 
         if (!startTime || !endTime) {
             showToast('Выберите время', true);
+            return;
+        }
+
+        const start = new Date(startTime);
+        if (start <= new Date()) {
+            showToast('Нельзя бронировать прошлое время', true);
             return;
         }
 
@@ -462,6 +565,8 @@
     }
 
     async function cancelBooking(bookingId) {
+        if (!confirm('Вы уверены, что хотите отменить бронирование?')) return;
+
         try {
             const response = await fetch(`/api/bookings/${bookingId}/cancel`, {
                 method: 'POST',
@@ -472,9 +577,11 @@
                 showToast('Бронирование отменено');
                 loadMyBookings();
                 loadWorkspaces();
+            } else {
+                showToast('Ошибка отмены', true);
             }
         } catch (error) {
-            showToast('Ошибка отмены', true);
+            showToast('Ошибка соединения', true);
         }
     }
 
@@ -484,15 +591,10 @@
 
     function showToast(message, isError = false) {
         const toast = document.getElementById('toast');
-        toast.style.backgroundColor = isError ? '#f56565' : '#48bb78';
         toast.textContent = message;
+        toast.className = isError ? 'toast error' : 'toast';
         toast.style.display = 'block';
         setTimeout(() => toast.style.display = 'none', 3000);
-    }
-
-    async function logout() {
-        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-        window.location.href = '/';
     }
 
     function escapeHtml(str) {
@@ -505,13 +607,19 @@
         });
     }
 
-    // Инициализация
+    async function logout() {
+        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+        window.location.href = '/';
+    }
+
+    // Закрытие модалки по клику вне
     window.onclick = function(event) {
         if (event.target.classList && event.target.classList.contains('modal')) {
             closeModal();
         }
     };
 
+    // Инициализация
     loadUser().then(() => {
         loadWorkspaces();
         loadMyBookings();

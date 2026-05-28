@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бухгалтерия - SmartSpace Access</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo h2 {
+            color: #667eea;
+        }
+
+        .nav {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .nav a:hover {
+            color: #667eea;
+        }
+
+        .btn-logout {
+            background: #f56565;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #718096;
+            margin-top: 8px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: white;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow-x: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-draft { background: #e2e8f0; color: #2d3748; }
+        .status-pending { background: #fefcbf; color: #975a16; }
+        .status-paid { background: #c6f6d5; color: #22543d; }
+
+        .btn-review {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .btn-review:hover {
+            background: #38a169;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #a0aec0;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .toast.error {
+            background: #f56565;
+        }
+
+        @media (max-width: 768px) {
+            th, td {
+                font-size: 12px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="logo">
+        <h2>🚀 SmartSpace Access | Бухгалтерия</h2>
+    </div>
+    <div class="nav">
+        <a href="dashboard.html">📅 Бронирования</a>
+        <a href="accountant.html" style="color: #667eea;">💰 Счета</a>
+        <button class="btn-logout" onclick="logout()">Выйти</button>
+    </div>
+</div>
+
+<div class="container">
+    <h1 class="page-title">💰 Управление счетами</h1>
+    <p class="page-subtitle">Проверка и подтверждение счетов</p>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number" id="statDraft">0</div>
+            <div class="stat-label">Черновики</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="statPending">0</div>
+            <div class="stat-label">Ожидают оплаты</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="statPaid">0</div>
+            <div class="stat-label">Оплачено</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="statTotalSum">0 ₽</div>
+            <div class="stat-label">Общая сумма</div>
+        </div>
+    </div>
+
+    <div class="filters">
+        <button class="filter-btn active" data-filter="all">Все</button>
+        <button class="filter-btn" data-filter="DRAFT">Черновики</button>
+        <button class="filter-btn" data-filter="PENDING">Ожидают оплаты</button>
+        <button class="filter-btn" data-filter="PAID">Оплаченные</button>
+    </div>
+
+    <div class="table-container">
+        <table id="invoicesTable">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Клиент</th>
+                <th>Сумма</th>
+                <th>Дата создания</th>
+                <th>Статус</th>
+                <th>Действия</th>
+            </tr>
+            </thead>
+            <tbody id="invoicesTableBody">
+            <tr><td colspan="6" style="text-align: center;">⏳ Загрузка...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    let allInvoices = [];
+    let currentFilter = 'all';
+
+    async function loadInvoices() {
+        try {
+            console.log('Загрузка счетов...');
+            const response = await fetch('/api/invoices/all', {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('Статус ответа:', response.status);
+
+            if (response.ok) {
+                allInvoices = await response.json();
+                console.log('Загружено счетов:', allInvoices.length);
+                console.log('Счета:', allInvoices);
+                renderTable();
+                updateStats();
+            } else if (response.status === 401) {
+                window.location.href = '/login.html';
+            } else {
+                const errorText = await response.text();
+                console.error('Ошибка:', errorText);
+                document.getElementById('invoicesTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center;">❌ Ошибка загрузки: ' + response.status + '</td></tr>';
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки:', error);
+            document.getElementById('invoicesTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center;">❌ Ошибка загрузки: ' + error.message + '</td></tr>';
+        }
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('invoicesTableBody');
+
+        let filtered = allInvoices;
+        if (currentFilter !== 'all') {
+            filtered = allInvoices.filter(i => i.status === currentFilter);
+        }
+
+        if (!filtered || filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">📭 Нет счетов в этой категории</td></tr>';
+            return;
+        }
+
+        let html = '';
+        for (let i = 0; i < filtered.length; i++) {
+            const inv = filtered[i];
+
+            let statusText = '';
+            let statusClass = '';
+            if (inv.status === 'DRAFT') {
+                statusText = 'Черновик';
+                statusClass = 'status-draft';
+            } else if (inv.status === 'PENDING') {
+                statusText = 'Ожидает оплаты';
+                statusClass = 'status-pending';
+            } else if (inv.status === 'PAID') {
+                statusText = 'Оплачен';
+                statusClass = 'status-paid';
+            } else {
+                statusText = inv.status;
+                statusClass = 'status-draft';
+            }
+
+            const date = new Date(inv.createdAt);
+            const formattedDate = date.toLocaleDateString('ru-RU') + ' ' + date.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'});
+
+            html += `
+                <tr>
+                    <td>${inv.id}</td>
+                    <td>Клиент #${inv.clientId}</td>
+                    <td><strong>${inv.amount} ₽</strong></td>
+                    <td>${formattedDate}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>
+                        ${inv.status === 'DRAFT' ?
+                            `<button class="btn-review" onclick="reviewInvoice(${inv.id})">✅ Подтвердить</button>` :
+                            '<span style="color: #a0aec0;">—</span>'}
+                    </td>
+                </tr>
+            `;
+        }
+        tbody.innerHTML = html;
+    }
+
+    async function reviewInvoice(invoiceId) {
+        try {
+            console.log('Подтверждение счета:', invoiceId);
+            const response = await fetch(`/api/invoices/${invoiceId}/review`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+            console.log('Результат:', result);
+
+            if (result.success) {
+                showToast('✅ Счет подтвержден');
+                loadInvoices(); // Перезагружаем список
+            } else {
+                showToast(result.error || 'Ошибка подтверждения', true);
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showToast('Ошибка соединения', true);
+        }
+    }
+
+    function updateStats() {
+        const draft = allInvoices.filter(i => i.status === 'DRAFT').length;
+        const pending = allInvoices.filter(i => i.status === 'PENDING').length;
+        const paid = allInvoices.filter(i => i.status === 'PAID').length;
+        const totalSum = allInvoices.reduce((sum, i) => sum + (i.amount || 0), 0);
+
+        document.getElementById('statDraft').textContent = draft;
+        document.getElementById('statPending').textContent = pending;
+        document.getElementById('statPaid').textContent = paid;
+        document.getElementById('statTotalSum').innerHTML = totalSum.toFixed(2) + ' ₽';
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = isError ? 'toast error' : 'toast';
+        toast.style.display = 'block';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3000);
+    }
+
+    async function logout() {
+        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+        window.location.href = '/';
+    }
+
+    async function checkAuth() {
+        try {
+            const response = await fetch('/api/auth/me', { credentials: 'include' });
+            if (!response.ok) {
+                window.location.href = '/login.html';
+            } else {
+                const user = await response.json();
+                console.log('Пользователь:', user);
+                if (user.role !== 'ACCOUNTANT' && user.role !== 'ADMIN') {
+                    showToast('У вас нет прав бухгалтера', true);
+                    setTimeout(() => window.location.href = '/dashboard.html', 2000);
+                }
+            }
+        } catch (error) {
+            window.location.href = '/login.html';
+        }
+    }
+
+    // Фильтры
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            renderTable();
+        });
+    });
+
+    // Запуск
+    checkAuth();
+    loadInvoices();
+</script>
+</body>
+</html>
